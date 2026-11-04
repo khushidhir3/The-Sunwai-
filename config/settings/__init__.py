@@ -1,6 +1,3 @@
-"""Settings package — defaults to dev."""
-import os
-from decouple import config
-
-env = config('DJANGO_SETTINGS_MODULE', default='config.settings.dev')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', env)
+"""The Sunwai — Settings package."""
+# Import dev settings by default so config.settings contains all Django settings
+from .dev import *  # noqa: F401,F403
