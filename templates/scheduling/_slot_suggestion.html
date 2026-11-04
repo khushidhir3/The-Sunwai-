@@ -1,0 +1,21 @@
+{% if suggested_date %}
+    <div style="background: var(--newsprint); border: 1.5px dashed var(--oxblood); padding: 12px; margin-top: 10px; font-family: var(--font-body); font-size: var(--text-xs);">
+        <strong style="color: var(--oxblood); font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">
+            Suggested Next Available Roster Window:
+        </strong>
+        <span>Date: <strong>{{ suggested_date }}</strong> &bull; Window: <strong>{{ suggested_start|time:"H:i" }} &ndash; {{ suggested_end|time:"H:i" }}</strong></span>
+        <div style="margin-top: 6px;">
+            <button type="button" class="btn btn--sm" onclick="
+                document.getElementById('date').value = '{{ suggested_date|date:'Y-m-d' }}';
+                document.getElementById('start_time').value = '{{ suggested_start|time:'H:i' }}';
+                document.getElementById('end_time').value = '{{ suggested_end|time:'H:i' }}';
+            ">
+                Apply Suggested Slot &darr;
+            </button>
+        </div>
+    </div>
+{% elif no_slots %}
+    <div style="background: var(--newsprint-dark); padding: 8px 12px; margin-top: 8px; font-size: var(--text-xs); color: var(--oxblood); font-style: italic;">
+        No free slots available on selected bench for the upcoming 14 days. Please review manual calendar.
+    </div>
+{% endif %}

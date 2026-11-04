@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Case Bundle &bull; {{ case.case_no }} &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto; padding: 24px;" x-data="{ activeDoc: 1 }">
+
+    <div style="border-bottom: 3px double var(--ink); padding-bottom: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;">
+        <div>
+            <span class="kicker">Consolidated Electronic Bundle (Order XI CPC)</span>
+            <h2 class="headline headline--lead" style="font-size: var(--text-3xl); margin-bottom: 4px;">
+                {{ case.case_no }} &mdash; Master Digital Bundle
+            </h2>
+            <div class="deck" style="margin-bottom: 0;">
+                {{ case.title }} &bull; Certified by Registry Officer on {{ today_date|date:"d F Y" }}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'cases:case_detail' case.case_no %}" class="btn">
+                &larr; Back to Case Docket
+            </a>
+            <button onclick="window.print()" class="btn btn--filled">
+                Print Bundle Index
+            </button>
+        </div>
+    </div>
+
+    <!-- 2 Column Bundle Workspace -->
+    <div style="display: grid; grid-template-columns: 320px 1fr; gap: 24px; align-items: start;">
+
+        <!-- Left Column: Document Table of Contents -->
+        <aside style="background: var(--cream); border: 2px solid var(--ink); padding: 16px;">
+            <div style="border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 class="headline headline--section" style="font-size: var(--text-base); text-transform: uppercase; letter-spacing: 0.08em; margin: 0;">
+                    Bundle Index &bull; Index Tabulae
+                </h3>
+                <span style="font-size: var(--text-xs); color: var(--muted); font-family: var(--font-body);">Click to inspect document</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                {% for pleading in pleadings %}
+                    <button type="button" @click="activeDoc = {{ forloop.counter }}"
+                        :style="activeDoc === {{ forloop.counter }} ? 'background: var(--ink); color: var(--newsprint); border-color: var(--ink); font-weight: 700;' : 'background: var(--newsprint); color: var(--ink); border-color: var(--hairline);'"
+                        style="text-align: left; padding: 10px 12px; border: 1.5px solid; cursor: pointer; font-family: var(--font-headline); font-size: var(--text-xs); transition: all 150ms ease; line-height: 1.3;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                            <span>TAB {{ forloop.counter }}</span>
+                            <span style="font-size: 10px; opacity: 0.8;">{{ pleading.uploaded_at|date:"d/m/Y" }}</span>
+                        </div>
+                        <div style="margin-top: 4px; font-family: var(--font-body); font-size: 12px;">
+                            {{ pleading.title }}
+                        </div>
+                    </button>
+                {% empty %}
+                    <!-- Sample Tabs if no files uploaded yet -->
+                    <button type="button" @click="activeDoc = 1"
+                        :style="activeDoc === 1 ? 'background: var(--ink); color: var(--newsprint);' : 'background: var(--newsprint); color: var(--ink);'"
+                        style="text-align: left; padding: 10px 12px; border: 1px solid var(--ink); cursor: pointer; font-family: var(--font-headline); font-size: var(--text-xs);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>TAB 1 &bull; PLAINT</span>
+                            <span style="font-size: 10px;">Filed 10/10/24</span>
+                        </div>
+                        <div style="margin-top: 4px; font-family: var(--font-body); font-size: 12px;">
+                            Plaint under Order VII Rule 1 CPC with Statement of Claim
+                        </div>
+                    </button>
+
+                    <button type="button" @click="activeDoc = 2"
+                        :style="activeDoc === 2 ? 'background: var(--ink); color: var(--newsprint);' : 'background: var(--newsprint); color: var(--ink);'"
+                        style="text-align: left; padding: 10px 12px; border: 1px solid var(--ink); cursor: pointer; font-family: var(--font-headline); font-size: var(--text-xs);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>TAB 2 &bull; DEFENCE</span>
+                            <span style="font-size: 10px;">Filed 24/10/24</span>
+                        </div>
+                        <div style="margin-top: 4px; font-family: var(--font-body); font-size: 12px;">
+                            Written Statement &amp; Counter-Claim of Respondent
+                        </div>
+                    </button>
+
+                    <button type="button" @click="activeDoc = 3"
+                        :style="activeDoc === 3 ? 'background: var(--ink); color: var(--newsprint);' : 'background: var(--newsprint); color: var(--ink);'"
+                        style="text-align: left; padding: 10px 12px; border: 1px solid var(--ink); cursor: pointer; font-family: var(--font-headline); font-size: var(--text-xs);">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>TAB 3 &bull; ISSUES</span>
+                            <span style="font-size: 10px;">Filed 01/11/24</span>
+                        </div>
+                        <div style="margin-top: 4px; font-family: var(--font-body); font-size: 12px;">
+                            Draft Agreed Issues &amp; Timetable for Determination
+                        </div>
+                    </button>
+                {% endfor %}
+            </div>
+
+            <div style="margin-top: 20px; padding: 12px; border: 1px dashed var(--hairline); font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); text-align: center;">
+                Certified PDF/A-1b Standard &bull; Cryptographic Checksum Verified
+            </div>
+        </aside>
+
+
+        <!-- Right Column: Document Viewer Display -->
+        <main style="background: var(--cream); border: 2px solid var(--ink); padding: 36px 48px; box-shadow: 4px 4px 0px rgba(26,26,26,0.1); min-height: 700px;">
+            
+            <!-- Document Header -->
+            <div style="text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 18px; margin-bottom: 24px;">
+                <div style="font-family: var(--font-masthead); font-size: var(--text-2xl); color: var(--ink);">
+                    In The High Court of Judicature
+                </div>
+                <div style="font-family: var(--font-headline); font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 4px 0;">
+                    Commercial Division &bull; Case Management Jurisdiction
+                </div>
+                <div style="font-family: var(--font-headline); font-weight: 700; font-size: var(--text-lg); color: var(--oxblood);">
+                    {{ case.case_no }} &mdash; {{ case.title }}
+                </div>
+            </div>
+
+            <!-- Interactive Document Views -->
+            <article x-show="activeDoc === 1" style="line-height: 1.8; font-family: var(--font-body); font-size: var(--text-sm); text-align: justify;">
+                <div style="text-align: center; font-family: var(--font-headline); font-weight: 900; font-size: var(--text-xl); text-transform: uppercase; margin-bottom: 18px; border-bottom: 1px solid var(--hairline); padding-bottom: 8px;">
+                    Plaint Under Order VII Rule 1 of the Code of Civil Procedure, 1908
+                </div>
+
+                <p class="drop-cap">
+                    The Plaintiff above-named respectfully submits that this suit is instituted for recovery of agreed consideration under contract, permanent injunction restraining invocation of bank guarantees, and consequential reliefs arising out of execution of infrastructure works.
+                </p>
+                <p>
+                    <strong>1.</strong> The Plaintiff is a registered legal entity having its principal office at New Delhi and carrying on business in accordance with law.
+                </p>
+                <p>
+                    <strong>2.</strong> On or about March 14th, the Defendant issued a letter of intent followed by formal contract execution. The contract specified explicit payment milestones subject to verification of progress certificates.
+                </p>
+                <p>
+                    <strong>3.</strong> Despite timely submission of milestone deliverables, the Defendant arbitrarily withheld payments totaling the principal claim sum without lawful justification or prior contractual notice.
+                </p>
+                <p>
+                    <strong>4. Cause of Action:</strong> The cause of action arose on dates specified in paragraph 12 when defendant refused disbursement upon formal notice of dispute.
+                </p>
+                <p>
+                    <strong>5. Valuation &amp; Reliefs Prayed:</strong> The Plaintiff prays for a decree for the sum claimed together with pendente-lite interest at 12% per annum until realization.
+                </p>
+
+                <div style="margin-top: 36px; padding-top: 18px; border-top: 1px solid var(--ink); display: flex; justify-content: space-between; font-size: var(--text-xs);">
+                    <div>Advocate for Plaintiff: <em>Learned Counsel</em></div>
+                    <div>Verified on Oath: <em>Authorized Signatory</em></div>
+                </div>
+            </article>
+
+            <article x-show="activeDoc === 2" style="display: none; line-height: 1.8; font-family: var(--font-body); font-size: var(--text-sm); text-align: justify;">
+                <div style="text-align: center; font-family: var(--font-headline); font-weight: 900; font-size: var(--text-xl); text-transform: uppercase; margin-bottom: 18px; border-bottom: 1px solid var(--hairline); padding-bottom: 8px;">
+                    Written Statement &amp; Counter-Claim of Defendant
+                </div>
+
+                <p class="drop-cap">
+                    The Defendant above-named respectfully submits this Written Statement in response to the Plaint, denying each and every allegation save and except what is specifically admitted herein.
+                </p>
+                <p>
+                    <strong>Preliminary Objections:</strong> The suit is barred by limitation and does not disclose a valid cause of action against the answering defendant. The plaintiff has willfully suppressed material default notices.
+                </p>
+                <p>
+                    <strong>Merits:</strong> With reference to paragraphs 1 to 5, the defendant states that the deliverables submitted failed independent inspection tests. Under clause 14.2 of the agreement, liquidated damages were rightly adjusted against running accounts.
+                </p>
+                <p>
+                    <strong>Counter-Claim:</strong> The defendant claims damages for project delay and costs occasioned by remedial works undertaken through third-party contractors.
+                </p>
+            </article>
+
+            <article x-show="activeDoc === 3" style="display: none; line-height: 1.8; font-family: var(--font-body); font-size: var(--text-sm); text-align: justify;">
+                <div style="text-align: center; font-family: var(--font-headline); font-weight: 900; font-size: var(--text-xl); text-transform: uppercase; margin-bottom: 18px; border-bottom: 1px solid var(--hairline); padding-bottom: 8px;">
+                    Joint Statement of Issues Proposed for Determination
+                </div>
+
+                <p class="drop-cap">
+                    Pursuant to Order X, Rule 1 of the Code of Civil Procedure and the Practice Directions for Case Management Hearings, the parties jointly submit the following issues for consideration by the Bench:
+                </p>
+                <ol style="padding-left: 24px; line-height: 2;">
+                    <li>Whether the suit has been validly instituted by an authorized person on behalf of the plaintiff? (OPP)</li>
+                    <li>Whether the plaintiff fulfilled contractual milestones in accordance with quality specifications? (OPP)</li>
+                    <li>Whether the defendant was contractually justified in levying liquidated damages under clause 14.2? (OPD)</li>
+                    <li>Whether the defendant is entitled to recovery under its counter-claim? (OPD)</li>
+                    <li>What reliefs, if any, are the parties entitled to?</li>
+                </ol>
+            </article>
+
+            <article x-show="activeDoc > 3" style="display: none; text-align: center; padding: 48px 0; color: var(--muted); font-style: italic;">
+                Document selected. Verified digital file attached in registry archive.
+            </article>
+
+        </main>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Record Directions &bull; {{ case.case_no }} &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 960px; margin: 30px auto; padding: 32px; background: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 6px 0px rgba(26,26,26,0.12);"
+     x-data="{
+        directions: [
+            { id: 1, text: '', deadline: '' }
+        ],
+        addDirection() {
+            const nextId = this.directions.length + 1;
+            this.directions.push({ id: nextId, text: '', deadline: '' });
+        },
+        useTemplate(text) {
+            this.directions[this.directions.length - 1].text = text;
+        }
+     }">
+
+    <!-- Header -->
+    <div style="border-bottom: 2px solid var(--ink); padding-bottom: 16px; margin-bottom: 24px;">
+        <span class="kicker">Judicial Minute &bull; Order Sheet Formulation</span>
+        <h2 class="headline headline--section" style="font-size: var(--text-3xl); margin-top: 4px;">
+            Record Case Management Directions
+        </h2>
+        <div class="deck" style="margin-bottom: 0;">
+            Cause: <strong>{{ case.case_no }} &mdash; {{ case.title }}</strong> &bull; Presided by Hon'ble {{ hearing.slot.judge.display_name }}
+        </div>
+    </div>
+
+    <!-- Direction Templates Palette -->
+    <div style="background: var(--newsprint); border: 1.5px solid var(--hairline); padding: 14px; margin-bottom: 24px;">
+        <h4 style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">
+            Standard Practice Direction Templates (Click to Insert)
+        </h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button type="button" @click="useTemplate('Plaintiff shall file and serve list of documents along with admission/denial within 2 weeks.')"
+                class="btn btn--sm" style="font-size: 11px;">
+                + Admission / Denial of Documents (14 Days)
+            </button>
+            <button type="button" @click="useTemplate('Parties shall exchange list of witnesses and file evidence affidavits of PW-1 and DW-1 within 3 weeks.')"
+                class="btn btn--sm" style="font-size: 11px;">
+                + Exchange of Witness Affidavits (21 Days)
+            </button>
+            <button type="button" @click="useTemplate('Parties to submit joint agreed issues; failing agreement, separate proposed issues to be tendered 48 hours prior to next date.')"
+                class="btn btn--sm" style="font-size: 11px;">
+                + Framing of Issues &amp; Timetable
+            </button>
+            <button type="button" @click="useTemplate('Matter referred to Delhi High Court Mediation Centre. Report to be submitted prior to next sitting.')"
+                class="btn btn--sm" style="font-size: 11px;">
+                + Reference to Mediation
+            </button>
+        </div>
+    </div>
+
+    <!-- Direction Recording Form -->
+    <form method="post" action="{% url 'directions:record_directions' hearing.pk %}" style="display: flex; flex-direction: column; gap: 20px;">
+        {% csrf_token %}
+
+        <template x-for="(dir, index) in directions" :key="dir.id">
+            <div style="background: var(--newsprint); border: 1.5px solid var(--ink); padding: 16px; position: relative;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-family: var(--font-headline); font-weight: 700; font-size: var(--text-sm); text-transform: uppercase; color: var(--oxblood);"
+                          x-text="'Direction #' + (index + 1)"></span>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                        Order / Direction Text
+                    </label>
+                    <textarea :name="'direction_' + (index + 1)" x-model="dir.text" rows="3" required placeholder="Specify judicial direction, document production order, or witness deadline..."
+                        style="width: 100%; padding: 10px; font-family: var(--font-body); font-size: var(--text-sm); border: 1px solid var(--ink); background: var(--cream); outline: none; resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 16px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">
+                            Strict Compliance Deadline
+                        </label>
+                        <input type="date" :name="'deadline_' + (index + 1)" x-model="dir.deadline"
+                            style="width: 100%; padding: 8px 10px; font-family: var(--font-body); font-size: var(--text-xs); border: 1px solid var(--ink); background: var(--cream);">
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Add Next Direction Button -->
+        <div>
+            <button type="button" @click="addDirection()" class="btn btn--sm" style="background: var(--newsprint);">
+                + Add Subsequent Direction
+            </button>
+        </div>
+
+        <!-- Submit & Actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 2px solid var(--ink);">
+            <a href="{% url 'hearings:hearing_room' hearing.pk %}" class="btn">
+                &larr; Return to Hearing Chamber
+            </a>
+            <button type="submit" class="btn btn--filled" style="background: var(--oxblood); border-color: var(--oxblood); padding: 12px 28px; font-size: var(--text-base);">
+                Pronounce &amp; Issue Court Order Sheet &rarr;
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

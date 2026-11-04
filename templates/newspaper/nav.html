@@ -1,0 +1,42 @@
+<nav class="section-nav" aria-label="Newspaper Sections">
+    <a href="{% url 'dashboard:front_page' %}" class="section-nav__link {% if request.resolver_match.url_name == 'front_page' %}section-nav__link--active{% endif %}">
+        Front Page
+    </a>
+    <a href="{% url 'scheduling:cause_list' %}" class="section-nav__link {% if request.resolver_match.app_name == 'scheduling' and request.resolver_match.url_name == 'cause_list' %}section-nav__link--active{% endif %}">
+        Cause List
+    </a>
+    <a href="{% url 'cases:case_list' %}" class="section-nav__link {% if request.resolver_match.app_name == 'cases' %}section-nav__link--active{% endif %}">
+        Case Register
+    </a>
+    {% if user.is_registrar or user.is_admin %}
+    <a href="{% url 'scheduling:schedule_hearing' %}" class="section-nav__link {% if request.resolver_match.url_name == 'schedule_hearing' %}section-nav__link--active{% endif %}">
+        Schedule Hearing
+    </a>
+    {% endif %}
+    <a href="{% url 'directions:directions_list' %}" class="section-nav__link {% if request.resolver_match.app_name == 'directions' %}section-nav__link--active{% endif %}">
+        Directions &amp; Compliance
+    </a>
+    {% if user.is_staff or user.is_admin %}
+    <a href="{% url 'audit:audit_log' %}" class="section-nav__link {% if request.resolver_match.app_name == 'audit' %}section-nav__link--active{% endif %}">
+        Audit Registry
+    </a>
+    {% endif %}
+
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 1rem; padding-right: 1rem;">
+        {% if user.is_authenticated %}
+            <span style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em;">
+                <strong>{{ user.display_name }}</strong> ({{ user.get_role_display }})
+            </span>
+            <a href="{% url 'accounts:profile' %}" class="section-nav__link {% if request.resolver_match.url_name == 'profile' %}section-nav__link--active{% endif %}" style="font-size: var(--text-xs);">
+                Profile
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="section-nav__link" style="font-size: var(--text-xs); color: var(--oxblood);">
+                Sign Out
+            </a>
+        {% else %}
+            <a href="{% url 'accounts:login' %}" class="section-nav__link section-nav__link--active" style="font-size: var(--text-xs);">
+                Sign In &rarr;
+            </a>
+        {% endif %}
+    </div>
+</nav>

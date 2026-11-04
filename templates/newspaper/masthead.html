@@ -1,0 +1,22 @@
+{% load static %}
+<header class="masthead">
+    <div class="masthead__topstrip">
+        <span>Vol. {{ volume_no|default:"I" }} &bull; Issue No. {{ issue_no|default:"42" }}</span>
+        <span>{{ edition_date }}</span>
+        <span>Late Bench Edition &bull; Gazette Register</span>
+    </div>
+
+    <h1 class="masthead__title">
+        <a href="{% url 'dashboard:front_page' %}" style="text-decoration: none; border-bottom: none; color: inherit;">
+            The Sunwai
+        </a>
+    </h1>
+
+    <div class="masthead__tagline-row">
+        <span>Established {{ portal_established|default:"2024" }}</span>
+        <span class="dot">&bull;</span>
+        <em>{{ portal_tagline|default:"The e-Portal for Case Management Hearings" }}</em>
+        <span class="dot">&bull;</span>
+        <span>Court Registry &amp; Cause Docket</span>
+    </div>
+</header>

@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Virtual Hearing Room &bull; {{ hearing.slot.case.case_no }} &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 1440px; margin: 0 auto; padding: 20px;">
+
+    <!-- Hearing Room Top Docket Bar -->
+    <div style="background: var(--cream); border: 2px solid var(--ink); padding: 16px 24px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-family: var(--font-body); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; background: var(--oxblood); color: var(--newsprint); padding: 2px 8px; font-weight: 700;">
+                    LIVE PROCEEDINGS
+                </span>
+                <span class="kicker" style="margin-bottom: 0;">Courtroom: {{ hearing.slot.courtroom.name }}</span>
+            </div>
+            <h2 class="headline headline--section" style="font-size: var(--text-2xl); margin: 4px 0 2px 0;">
+                {{ hearing.slot.case.case_no }}: {{ hearing.slot.case.title }}
+            </h2>
+            <div style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted);">
+                Presiding: <strong>Hon'ble {{ hearing.slot.judge.display_name }}</strong> &bull; Scheduled: {{ hearing.slot.start_time|time:"H:i" }} &ndash; {{ hearing.slot.end_time|time:"H:i" }} &bull; Purpose: {{ hearing.slot.purpose }}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'cases:case_bundle' hearing.slot.case.case_no %}" target="_blank" class="btn btn--sm">
+                Inspect Bundle &rarr;
+            </a>
+            {% if is_judge %}
+                <a href="{% url 'directions:record_directions' hearing.pk %}" class="btn btn--sm btn--filled" style="background: var(--oxblood); border-color: var(--oxblood);">
+                    Record Formal Directions &rarr;
+                </a>
+            {% endif %}
+            <a href="{% url 'directions:order_pdf' hearing.pk %}" target="_blank" class="btn btn--sm">
+                Order Sheet (PDF)
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Hearing Floor: Video Stream Left + Bench Tools Right -->
+    <div style="display: grid; grid-template-columns: 1fr 420px; gap: 20px; align-items: start;">
+
+        <!-- Video Conference Chamber (Jitsi Meet) -->
+        <div style="background: var(--ink); border: 2px solid var(--ink); box-shadow: 4px 4px 0px rgba(26,26,26,0.15); overflow: hidden; display: flex; flex-direction: column;">
+            <div style="background: var(--newsprint-dark); border-bottom: 2px solid var(--ink); padding: 8px 16px; display: flex; justify-content: space-between; align-items: center; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700;">
+                <span>Virtual Courtroom Chamber &bull; Secure Encrypted Session</span>
+                <span style="color: var(--oxblood);">&bull; Recording Mode Active</span>
+            </div>
+
+            <!-- Jitsi Iframe Container -->
+            <div style="position: relative; width: 100%; height: 640px; background: #0e0e0e;">
+                <iframe
+                    src="https://{{ jitsi_domain }}/TheSunwai_{{ hearing.slot.case.case_no|slugify }}#userInfo.displayName={{ user.display_name|urlencode }}&config.prejoinPageEnabled=false"
+                    style="width: 100%; height: 100%; border: none;"
+                    allow="camera; microphone; fullscreen; display-capture"
+                    title="Virtual Hearing Jitsi Chamber">
+                </iframe>
+            </div>
+
+            <!-- Judicial Chamber Ribbon -->
+            <div style="background: var(--newsprint); border-top: 1.5px solid var(--ink); padding: 8px 16px; font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); display: flex; justify-content: space-between;">
+                <span>Room Identifier: <code>TheSunwai_{{ hearing.slot.case.case_no|slugify }}</code></span>
+                <span>Order X CPC Case Management Compliance</span>
+            </div>
+        </div>
+
+
+        <!-- Right Column: Pre-Hearing Checklist & Bench Minutes -->
+        <aside style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- Pre-Hearing Checklist -->
+            <div style="background: var(--cream); border: 2px solid var(--ink); padding: 18px;">
+                <div style="border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline;">
+                    <h3 class="headline headline--section" style="font-size: var(--text-base); text-transform: uppercase; letter-spacing: 0.08em; margin: 0;">
+                        Pre-Hearing Checklist
+                    </h3>
+                    <span style="font-size: 11px; color: var(--muted); font-family: var(--font-body);">Click checkbox to toggle</span>
+                </div>
+
+                <div id="checklist-items-container" style="display: flex; flex-direction: column; gap: 8px;">
+                    {% for item in checklist_items %}
+                        {% include "hearings/_checklist_item.html" with item=item %}
+                    {% empty %}
+                        <p style="font-style: italic; font-size: var(--text-xs); color: var(--muted);">No checklist items defined.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Judge's Confidential Bench Notes (Only for Judge) -->
+            {% if is_judge %}
+                <div style="background: var(--cream); border: 2px solid var(--ink); padding: 18px;">
+                    <div style="border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: baseline;">
+                        <h3 class="headline headline--section" style="font-size: var(--text-base); text-transform: uppercase; letter-spacing: 0.08em; margin: 0; color: var(--oxblood);">
+                            Confidential Bench Notes
+                        </h3>
+                        <span style="font-size: 11px; color: var(--muted); font-family: var(--font-body);">In-camera record</span>
+                    </div>
+
+                    <!-- Notes List -->
+                    <div style="margin-bottom: 12px;">
+                        {% include "hearings/_judge_notes.html" with judge_notes=judge_notes %}
+                    </div>
+
+                    <!-- Form to add note via HTMX -->
+                    <form hx-post="{% url 'hearings:save_judge_note' hearing.pk %}"
+                          hx-target="#judge-notes-list"
+                          hx-swap="outerHTML"
+                          hx-on::after-request="this.reset()"
+                          style="display: flex; flex-direction: column; gap: 8px;">
+                        {% csrf_token %}
+                        <textarea name="content" rows="2" required placeholder="Record judicial observation, admissions, or interim direction note..."
+                            style="width: 100%; padding: 8px; font-family: var(--font-body); font-size: var(--text-xs); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none; resize: vertical;"></textarea>
+                        <button type="submit" class="btn btn--sm btn--filled" style="align-self: flex-end;">
+                            Add Bench Minute &rarr;
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <!-- Hearing Chat & Transcript Log -->
+            <div style="background: var(--cream); border: 2px solid var(--ink); padding: 18px;">
+                <div style="border-bottom: 2px solid var(--ink); padding-bottom: 8px; margin-bottom: 12px;">
+                    <h3 class="headline headline--section" style="font-size: var(--text-base); text-transform: uppercase; letter-spacing: 0.08em; margin: 0;">
+                        Chamber Registry Log
+                    </h3>
+                </div>
+
+                <div id="chat-messages" style="display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; font-family: var(--font-body); font-size: var(--text-xs); margin-bottom: 10px;">
+                    {% for msg in chat_messages %}
+                        <div style="border-bottom: 1px dashed var(--hairline); padding-bottom: 4px;">
+                            <strong>{{ msg.sender.display_name }}</strong> <span style="color: var(--muted); font-size: 10px;">({{ msg.created_at|date:"H:i" }}):</span>
+                            <div>{{ msg.message }}</div>
+                        </div>
+                    {% empty %}
+                        <p style="font-style: italic; color: var(--muted); font-size: 11px;">
+                            Official transcript feed connected. Formal statements recorded here.
+                        </p>
+                    {% endfor %}
+                </div>
+
+                <form id="chat-form" style="display: flex; gap: 6px; margin-top: 8px;" onsubmit="sendChatMessage(event)">
+                    <input type="text" id="chat-input" placeholder="Type message or statement..."
+                        style="flex: 1; padding: 6px 10px; font-family: var(--font-body); font-size: var(--text-xs); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+                    <button type="submit" class="btn btn--sm btn--filled" style="padding: 4px 10px;">
+                        Send
+                    </button>
+                </form>
+
+                <div style="font-family: var(--font-body); font-size: 11px; color: var(--muted); text-align: center; border-top: 1px solid var(--hairline); padding-top: 6px; margin-top: 8px;">
+                    Session verified by Court Registry Officer &bull; Encrypted WebSocket
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+</div>
+
+<script>
+    const hearingId = "{{ hearing.pk }}";
+    const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
+    const chatSocket = new WebSocket(
+        wsScheme + '://' + window.location.host + '/ws/hearing/' + hearingId + '/chat/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chatBox = document.getElementById('chat-messages');
+        if (data.type === 'message') {
+            const msgEl = document.createElement('div');
+            msgEl.style.borderBottom = '1px dashed var(--hairline)';
+            msgEl.style.paddingBottom = '4px';
+            msgEl.innerHTML = `<strong>${data.sender}</strong> <span style="color: var(--muted); font-size: 10px;">(${data.timestamp}):</span><div>${data.message}</div>`;
+            chatBox.appendChild(msgEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } else if (data.type === 'join') {
+            const joinEl = document.createElement('div');
+            joinEl.style.fontSize = '10px';
+            joinEl.style.color = 'var(--oxblood)';
+            joinEl.style.fontStyle = 'italic';
+            joinEl.textContent = `• ${data.username} (${data.role}) joined the chamber.`;
+            chatBox.appendChild(joinEl);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    };
+
+    chatSocket.onclose = function(e) {
+        console.log('Hearing chat socket closed.');
+    };
+
+    function sendChatMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if (message && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({ message: message }));
+            input.value = '';
+        }
+    }
+</script>
+{% endblock %}

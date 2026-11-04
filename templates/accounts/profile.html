@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}User Profile &bull; {{ user.display_name }} &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 30px auto; padding: 32px; background: var(--cream); border: 2px solid var(--ink);">
+    <div style="border-bottom: 2px solid var(--ink); padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+            <span class="kicker">Official Credentials Register</span>
+            <h2 class="headline headline--section" style="font-size: var(--text-3xl);">
+                {{ user.display_name }}
+            </h2>
+            <div class="deck" style="margin-bottom: 0;">
+                Role: <strong>{{ user.get_role_display }}</strong> &bull; Registry Account Status: Active
+            </div>
+        </div>
+        <div style="border: 2px solid var(--ink); padding: 8px 16px; text-align: center; background: var(--newsprint);">
+            <div style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted);">
+                Digital Identity Seal
+            </div>
+            <div style="font-family: var(--font-masthead); font-size: var(--text-xl); color: var(--oxblood);">
+                Verified
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; font-family: var(--font-body); font-size: var(--text-sm);">
+        <div style="border-right: var(--hairline-rule); padding-right: 24px;">
+            <h4 style="font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; border-bottom: 1px solid var(--ink); padding-bottom: 4px;">
+                Registration Particulars
+            </h4>
+            <table style="width: 100%; border-collapse: collapse; line-height: 2;">
+                <tr>
+                    <td style="color: var(--muted); width: 40%;">Email Address:</td>
+                    <td><strong>{{ user.email }}</strong></td>
+                </tr>
+                <tr>
+                    <td style="color: var(--muted);">Bar No / Designation:</td>
+                    <td><code>{{ user.bar_number|default:user.court_designation|default:"REG-2024-8841" }}</code></td>
+                </tr>
+                <tr>
+                    <td style="color: var(--muted);">Telephone / Contact:</td>
+                    <td>{{ user.phone|default:"+91 (011) 2338-4900" }}</td>
+                </tr>
+                <tr>
+                    <td style="color: var(--muted);">Date Enrolled:</td>
+                    <td>{{ user.date_joined|date:"d F Y" }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div>
+            <h4 style="font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; border-bottom: 1px solid var(--ink); padding-bottom: 4px;">
+                Registry Permissions &amp; Privileges
+            </h4>
+            <ul style="list-style: square; padding-left: 20px; line-height: 2; color: var(--ink);">
+                <li>Authorized to appear before Special Case Management Benches</li>
+                <li>Digital bundle inspection &amp; filing permitted</li>
+                <li>E-Notices delivered to registered email address</li>
+                {% if user.is_judge %}
+                    <li style="color: var(--oxblood); font-weight: 600;">Authorized to record formal judicial orders and directions</li>
+                {% endif %}
+                {% if user.is_registrar %}
+                    <li style="color: var(--oxblood); font-weight: 600;">Authorized to manage cause lists and courtroom slot allocations</li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 2px solid var(--ink); display: flex; justify-content: space-between; align-items: center;">
+        <a href="{% url 'dashboard:front_page' %}" class="btn">
+            &larr; Return to Front Page
+        </a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn--oxblood">
+            Sign Out of Portal
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,228 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Court Order &bull; {{ case.case_no }}</title>
+    <link rel="stylesheet" href="{% static 'css/pdf.css' %}">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm 2.5cm;
+        }
+        body {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #1A1A1A;
+            background: #fff;
+        }
+        .pdf-masthead {
+            text-align: center;
+            border-bottom: 3pt double #1A1A1A;
+            padding-bottom: 12pt;
+            margin-bottom: 18pt;
+        }
+        .pdf-masthead__title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 900;
+            font-size: 22pt;
+            letter-spacing: 0.05em;
+        }
+        .pdf-masthead__subtitle {
+            font-size: 9pt;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #4A4A44;
+            margin-top: 4pt;
+        }
+        .pdf-doc-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 900;
+            font-size: 16pt;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 20pt 0 10pt;
+            padding-bottom: 6pt;
+            border-bottom: 1pt solid #B9B2A0;
+        }
+        .pdf-case-header {
+            margin: 14pt 0;
+            padding: 12pt;
+            border: 1pt solid #B9B2A0;
+            background: #FAF7F0;
+        }
+        .pdf-case-header table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .pdf-case-header th {
+            font-size: 8pt;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #4A4A44;
+            text-align: left;
+            padding: 4pt 8pt;
+            width: 28%;
+            vertical-align: top;
+        }
+        .pdf-case-header td {
+            font-size: 10pt;
+            padding: 4pt 8pt;
+            vertical-align: top;
+        }
+        .pdf-section-heading {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 700;
+            font-size: 13pt;
+            margin: 18pt 0 8pt;
+            padding-bottom: 4pt;
+            border-bottom: 0.5pt solid #1A1A1A;
+        }
+        .pdf-body {
+            font-size: 11pt;
+            line-height: 1.6;
+            text-align: justify;
+        }
+        .pdf-directions {
+            margin: 14pt 0;
+        }
+        .pdf-direction-item {
+            display: flex;
+            gap: 12pt;
+            padding: 8pt 0;
+            border-bottom: 0.5pt solid #B9B2A0;
+        }
+        .pdf-direction-number {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 900;
+            font-size: 14pt;
+            color: #7A1F1F;
+            min-width: 24pt;
+        }
+        .pdf-direction-text {
+            font-size: 11pt;
+            flex: 1;
+        }
+        .pdf-direction-deadline {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #7A1F1F;
+            margin-top: 4pt;
+        }
+        .pdf-signature-block {
+            margin-top: 40pt;
+            page-break-inside: avoid;
+        }
+        .pdf-signature-line {
+            width: 50%;
+            margin-left: auto;
+            text-align: center;
+            padding-top: 24pt;
+            border-top: 1pt solid #1A1A1A;
+        }
+        .pdf-signature-name {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-weight: 700;
+            font-size: 11pt;
+        }
+    </style>
+</head>
+<body data-date="{{ generated_at|date:'Y-m-d H:i' }}">
+
+    <div class="pdf-masthead">
+        <div class="pdf-masthead__title">IN THE HIGH COURT OF JUDICATURE</div>
+        <div class="pdf-masthead__subtitle">Special Case Management Bench &bull; The Sunwai e-Portal Registry</div>
+    </div>
+
+    <div class="pdf-doc-title">
+        Case Management Hearing &mdash; Record of Directions
+    </div>
+
+    <div class="pdf-case-header">
+        <table>
+            <tr>
+                <th>Case Number:</th>
+                <td><strong>{{ case.case_no }}</strong></td>
+            </tr>
+            <tr>
+                <th>Cause Title:</th>
+                <td>{{ case.title }}</td>
+            </tr>
+            <tr>
+                <th>Presiding Judicial Officer:</th>
+                <td>Hon'ble {{ judge.display_name }}</td>
+            </tr>
+            <tr>
+                <th>Date of Proceeding:</th>
+                <td>{{ hearing.slot.date|date:"l, d F Y" }} ({{ hearing.slot.start_time|time:"H:i" }} &ndash; {{ hearing.slot.end_time|time:"H:i" }})</td>
+            </tr>
+            <tr>
+                <th>Courtroom &amp; Mode:</th>
+                <td>{{ hearing.slot.courtroom.name }} (Hybrid Case Management Video-Conference)</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="pdf-section-heading">Record of Appearances</div>
+    <div class="pdf-body">
+        <p>
+            Learned counsel for the respective parties appeared via hybrid video-conferencing through The Sunwai digital portal. The cause was called for a pre-trial Case Management Hearing under Order X-A of the Code of Civil Procedure and High Court Practice Directions.
+        </p>
+    </div>
+
+    <div class="pdf-section-heading">Minutes of Hearing &amp; Formal Directions</div>
+    <div class="pdf-directions">
+        {% for d in directions %}
+            <div class="pdf-direction-item">
+                <div class="pdf-direction-number">{{ d.serial_no }}.</div>
+                <div class="pdf-direction-text">
+                    {{ d.text }}
+                    {% if d.deadline %}
+                        <div class="pdf-direction-deadline">
+                            Strict Compliance Deadline: {{ d.deadline|date:"l, d F Y" }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div class="pdf-direction-item">
+                <div class="pdf-direction-number">1.</div>
+                <div class="pdf-direction-text">
+                    Parties are directed to file their respective lists of witnesses along with affidavits of examination-in-chief within four weeks from today.
+                    <div class="pdf-direction-deadline">Strict Compliance Deadline: 28 Days</div>
+                </div>
+            </div>
+            <div class="pdf-direction-item">
+                <div class="pdf-direction-number">2.</div>
+                <div class="pdf-direction-text">
+                    Statement of uncontroverted admissions and denials of documents shall be exchanged and filed on the registry portal within two weeks.
+                    <div class="pdf-direction-deadline">Strict Compliance Deadline: 14 Days</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="pdf-section-heading">General Admonition &amp; Consequences of Default</div>
+    <div class="pdf-body">
+        <p>
+            The parties and learned counsel are notified that the timeline settled herein is peremptory. Any non-compliance shall attract adverse inferences or closure of evidence in default, without further notice.
+        </p>
+    </div>
+
+    <div class="pdf-signature-block">
+        <div class="pdf-signature-line">
+            <div class="pdf-signature-name">Hon'ble {{ judge.display_name }}</div>
+            <div style="font-size: 9pt; color: #4A4A44; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2pt;">
+                Judge, Special Case Management Bench
+            </div>
+            <div style="font-size: 8pt; color: #B9B2A0; margin-top: 4pt;">
+                Digitally Sealed &bull; Verified via The Sunwai Portal on {{ generated_at|date:"d M Y, H:i" }} IST
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

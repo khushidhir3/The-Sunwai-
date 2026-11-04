@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Immutable Audit Register &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+
+    <!-- Audit Header Bar -->
+    <div style="border-bottom: 3px double var(--ink); padding-bottom: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="kicker">Append-Only Registry Ledger &bull; Statutory Oversight</span>
+            <h2 class="headline headline--lead" style="margin-bottom: 4px;">
+                Official Audit Register
+            </h2>
+            <div class="deck" style="margin-bottom: 0;">
+                Cryptographically verifiable, tamper-evident record of all registry actions, directions, scheduling, and pleading filings
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <form method="get" style="display: flex; gap: 10px; align-items: center; background: var(--cream); padding: 8px 12px; border: 1.5px solid var(--ink);">
+            <div>
+                <label for="model" style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-right: 4px;">Entity:</label>
+                <select name="model" id="model" onchange="this.form.submit()" style="font-family: var(--font-body); font-size: var(--text-xs); padding: 4px 8px; border: 1px solid var(--ink); background: var(--newsprint);">
+                    <option value="">All Entities</option>
+                    {% for m in model_names %}
+                        <option value="{{ m }}" {% if current_model == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="action" style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-right: 4px;">Action:</label>
+                <select name="action" id="action" onchange="this.form.submit()" style="font-family: var(--font-body); font-size: var(--text-xs); padding: 4px 8px; border: 1px solid var(--ink); background: var(--newsprint);">
+                    <option value="">All Actions</option>
+                    {% for code, label in action_choices %}
+                        <option value="{{ code }}" {% if current_action == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if current_model or current_action %}
+                <a href="{% url 'audit:audit_log' %}" style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--oxblood); margin-left: 6px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Ledger Table -->
+    <div style="border: 2px solid var(--ink); background: var(--cream); overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: var(--text-xs);">
+            <thead>
+                <tr style="background: var(--newsprint-dark); border-bottom: 2px solid var(--ink); font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; text-align: left;">
+                    <th style="padding: 10px 14px; border-right: var(--hairline-rule); width: 170px;">Timestamp (IST)</th>
+                    <th style="padding: 10px 14px; border-right: var(--hairline-rule); width: 150px;">Acting Officer</th>
+                    <th style="padding: 10px 14px; border-right: var(--hairline-rule); width: 100px;">Action</th>
+                    <th style="padding: 10px 14px; border-right: var(--hairline-rule); width: 140px;">Entity / Model</th>
+                    <th style="padding: 10px 14px; border-right: var(--hairline-rule);">Record Representation</th>
+                    <th style="padding: 10px 14px; width: 120px;">IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr style="border-bottom: 1px solid var(--hairline); transition: background-color var(--transition-fast);">
+                        <td style="padding: 10px 14px; border-right: var(--hairline-rule); font-family: monospace; font-size: 11px;">
+                            {{ log.timestamp|date:"Y-m-d H:i:s" }}
+                        </td>
+                        <td style="padding: 10px 14px; border-right: var(--hairline-rule); font-weight: 600;">
+                            {{ log.user.display_name|default:"System Engine" }}
+                            {% if log.user %}
+                                <div style="font-size: 10px; color: var(--muted); font-weight: normal;">
+                                    {{ log.user.get_role_display }}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 10px 14px; border-right: var(--hairline-rule);">
+                            <span style="display: inline-block; padding: 1px 6px; font-size: 10px; text-transform: uppercase; font-weight: 700; border: 1px solid var(--hairline); background: var(--newsprint); color: {% if log.action == 'delete' %}var(--oxblood){% else %}var(--ink){% endif %};">
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+                        <td style="padding: 10px 14px; border-right: var(--hairline-rule); text-transform: uppercase; letter-spacing: 0.05em;">
+                            {{ log.model_name }}
+                        </td>
+                        <td style="padding: 10px 14px; border-right: var(--hairline-rule); font-family: var(--font-body); line-height: 1.4;">
+                            <strong>{{ log.object_repr }}</strong>
+                            {% if log.changes %}
+                                <div style="font-family: monospace; font-size: 10px; color: var(--muted); margin-top: 2px;">
+                                    Diff: {{ log.changes|truncatechars:100 }}
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 10px 14px; font-family: monospace; font-size: 11px; color: var(--muted);">
+                            {{ log.ip_address|default:"127.0.0.1" }}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" style="padding: 36px; text-align: center; color: var(--muted); font-style: italic;">
+                            No audit ledger entries registered yet.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

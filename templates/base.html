@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The Sunwai — Digital Newspaper-style e-Portal for Pre-Trial Case Management Hearings">
+    <title>{% block title %}The Sunwai — The e-Portal for Case Management Hearings{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,300;1,8..60,400;1,8..60,600&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{% static 'css/newspaper.css' %}">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" defer></script>
+    <!-- Alpine.js -->
+    <script src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js" defer></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div class="page-container" style="max-width: 1400px; margin: 0 auto; background-color: var(--newsprint); min-height: 100vh; display: flex; flex-direction: column;">
+        
+        <!-- Newspaper Masthead -->
+        {% include "newspaper/masthead.html" %}
+
+        <!-- Navigation Bar -->
+        {% include "newspaper/nav.html" %}
+
+        <!-- Court Gazette Notices / Weather Ticker Strip -->
+        <div style="background: var(--newsprint-dark); border-bottom: 1px solid var(--ink); padding: 4px 16px; font-size: var(--text-xs); letter-spacing: 0.1em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-family: var(--font-body);">
+            <span><strong>Court Circular:</strong> Hybrid hearing mode in session &bull; Courtrooms 1 through 4 live</span>
+            <span>All skeleton arguments to be submitted 24 hours prior to hearing call</span>
+            <span>Registry Status: <strong>Open</strong></span>
+        </div>
+
+        <!-- Alert & Message Dispatch Banners -->
+        {% if messages %}
+            <div class="newspaper-dispatches" style="padding: 12px 24px; border-bottom: 2px solid var(--ink); background: var(--cream);">
+                {% for message in messages %}
+                    <div class="alert alert--{{ message.tags }}" style="padding: 8px 16px; margin-bottom: 6px; border-left: 4px solid {% if message.tags == 'error' %}var(--oxblood){% else %}var(--ink){% endif %}; font-family: var(--font-headline); font-size: var(--text-sm); display: flex; justify-content: space-between; align-items: center;">
+                        <span>
+                            <strong>{% if message.tags == 'error' %}OFFICIAL NOTICE (URGENT):{% else %}REGISTRY DISPATCH:{% endif %}</strong>
+                            {{ message }}
+                        </span>
+                        <span style="font-size: var(--text-xs); color: var(--muted); cursor: pointer;" onclick="this.parentElement.remove();">&times; Close</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Main Content Area -->
+        <main style="flex: 1;">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Newspaper Colophon / Footer -->
+        <footer class="newspaper-footer" style="margin-top: auto; border-top: 3px double var(--ink); padding: 24px 32px; background: var(--newsprint); font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted);">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; padding-bottom: 16px; border-bottom: var(--hairline-rule);">
+                <div>
+                    <h4 style="font-family: var(--font-headline); font-size: var(--text-base); text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink); margin-bottom: 8px;">
+                        The Sunwai Gazette &bull; Case Management Registry
+                    </h4>
+                    <p style="line-height: 1.6; text-align: justify;">
+                        Published under the authority of the High Court Registrar for Case Management Hearings and Pre-Trial Settlement Conferences. Established for prompt disposal of civil disputes, framing of issues, and adherence to time-bound court directions.
+                    </p>
+                </div>
+                <div>
+                    <h5 style="font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); margin-bottom: 8px;">
+                        Registry Bench Rules
+                    </h5>
+                    <ul style="list-style: square; padding-left: 18px; line-height: 1.8;">
+                        <li>Order X, Code of Civil Procedure</li>
+                        <li>Standard Pre-Trial Timetable Rules</li>
+                        <li>Virtual Courtroom Protocol (Jitsi Meet)</li>
+                        <li>Digital Bundle Format (PDF/A compliant)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 style="font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); margin-bottom: 8px;">
+                        Public Inquiries
+                    </h5>
+                    <p style="line-height: 1.6;">
+                        Registry Helpdesk: Room 104, West Wing<br>
+                        Email: registry@thesunwai.court<br>
+                        Digital Seal Verified: 2024–2026
+                    </p>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 12px;">
+                <span>&copy; {{ today_date|date:"Y" }} The Sunwai. All rights reserved. Official Electronic Gazette.</span>
+                <span>Designed in Gazette Broadsheet Typography &bull; ISO 19005-1 Compliant</span>
+            </div>
+        </footer>
+
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

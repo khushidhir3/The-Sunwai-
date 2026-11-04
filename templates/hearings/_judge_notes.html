@@ -1,0 +1,16 @@
+<div id="judge-notes-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto;">
+    {% for note in judge_notes %}
+        <div style="background: var(--newsprint); border-left: 3px solid var(--oxblood); padding: 8px 10px; font-family: var(--font-body); font-size: var(--text-xs);">
+            <div style="font-size: 10px; color: var(--muted); margin-bottom: 2px;">
+                {{ note.created_at|date:"H:i:s" }} &bull; Confidential Bench Minute
+            </div>
+            <div style="color: var(--ink); line-height: 1.4;">
+                {{ note.content }}
+            </div>
+        </div>
+    {% empty %}
+        <p style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); font-style: italic;">
+            No private bench minutes recorded yet.
+        </p>
+    {% endfor %}
+</div>

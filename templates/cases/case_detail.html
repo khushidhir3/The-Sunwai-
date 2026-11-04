@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ case.case_no }} &bull; Case Docket &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+
+    <!-- Docket Top Bar -->
+    <div style="border-bottom: 3px double var(--ink); padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="kicker">Case Management Docket &bull; Official Record</span>
+            <h2 class="headline headline--lead" style="font-size: var(--text-3xl); margin-bottom: 4px;">
+                {{ case.case_no }}: {{ case.title }}
+            </h2>
+            <div class="deck" style="margin-bottom: 0;">
+                Category: <strong>{{ case.get_case_type_display }}</strong> &bull; Stage: <strong>{{ case.stage|title }}</strong> &bull; Status: <strong>{{ case.get_status_display }}</strong>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <a href="{% url 'cases:case_bundle' case.case_no %}" class="btn btn--filled" style="background: var(--oxblood); border-color: var(--oxblood);">
+                Inspect Case Bundle &rarr;
+            </a>
+            {% if user.is_registrar or user.is_admin %}
+                <a href="{% url 'scheduling:schedule_hearing' %}" class="btn">
+                    Schedule Slot
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2 Column Layout: Case Narrative + Parties & Pleadings -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px;">
+
+        <!-- Left Column: Controversy Narrative, Hearing Schedule, Pleadings -->
+        <div>
+            <!-- Overview & Controversy -->
+            <article style="background: var(--cream); border: 2px solid var(--ink); padding: 24px; margin-bottom: 24px;">
+                <h3 class="headline headline--section" style="font-size: var(--text-xl); border-bottom: 1px solid var(--ink); padding-bottom: 6px; margin-bottom: 12px;">
+                    Controversy Summary &amp; Points for Determination
+                </h3>
+                <div class="body-text" style="font-size: var(--text-sm);">
+                    <p class="drop-cap">
+                        {{ case.description|default:"The dispute relates to breach of commercial covenants and recovery of liquidated damages arising out of the master service agreement. The plaintiff asserts full compliance and seeks injunctive restraint against encashment of bank guarantees, while defendant contests jurisdiction and asserts cross-claims regarding non-conforming deliverables." }}
+                    </p>
+                    <p>
+                        The case management bench has framed the initial pre-trial schedule to evaluate whether formal issues can be narrowed by consent under Order X, Rule 2 of the Code of Civil Procedure.
+                    </p>
+                </div>
+
+                <div style="margin-top: 16px; padding-top: 12px; border-top: var(--hairline-rule); display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-family: var(--font-body); font-size: var(--text-xs);">
+                    <div>
+                        <strong style="color: var(--muted); text-transform: uppercase;">Presiding Bench:</strong><br>
+                        Hon'ble {{ case.judge.display_name|default:"Chief Justice / Roster Judge" }}
+                    </div>
+                    <div>
+                        <strong style="color: var(--muted); text-transform: uppercase;">Category:</strong><br>
+                        {{ case.get_case_type_display }}
+                    </div>
+                    <div>
+                        <strong style="color: var(--muted); text-transform: uppercase;">Date Instituted:</strong><br>
+                        {{ case.filing_date|date:"d F Y" }}
+                    </div>
+                </div>
+            </article>
+
+            <!-- Hearing Slots & History -->
+            <section style="background: var(--cream); border: 2px solid var(--ink); padding: 24px; margin-bottom: 24px;">
+                <h3 class="headline headline--section" style="font-size: var(--text-xl); border-bottom: 1px solid var(--ink); padding-bottom: 6px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: baseline;">
+                    <span>Cause Hearings &amp; Conference Roster</span>
+                    <span style="font-size: var(--text-xs); font-family: var(--font-body); font-weight: normal; color: var(--muted);">Order X CPC Proceedings</span>
+                </h3>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for slot in hearing_slots %}
+                        <div style="border: 1px solid var(--hairline); background: var(--newsprint); padding: 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="font-family: var(--font-headline); font-weight: 700; font-size: var(--text-base); color: var(--oxblood);">
+                                        {{ slot.date|date:"D, d M Y" }} &bull; {{ slot.start_time|time:"H:i" }} &ndash; {{ slot.end_time|time:"H:i" }}
+                                    </span>
+                                    <span style="font-family: var(--font-body); font-size: var(--text-xs); text-transform: uppercase; background: var(--newsprint-dark); padding: 2px 6px; border: 1px solid var(--hairline);">
+                                        {{ slot.get_status_display }}
+                                    </span>
+                                </div>
+                                <div style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); margin-top: 4px;">
+                                    Courtroom: {{ slot.courtroom.name }} &bull; Purpose: {{ slot.purpose }}
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 8px;">
+                                {% if slot.hearing %}
+                                    <a href="{% url 'hearings:hearing_room' slot.hearing.pk %}" class="btn btn--sm btn--filled" style="background: var(--oxblood); border-color: var(--oxblood);">
+                                        Enter Virtual Room &rarr;
+                                    </a>
+                                    <a href="{% url 'directions:order_pdf' slot.hearing.pk %}" target="_blank" class="btn btn--sm">
+                                        Order PDF
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p style="font-family: var(--font-body); font-style: italic; color: var(--muted); font-size: var(--text-sm);">
+                            No hearing slots currently scheduled for this case.
+                        </p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Pleadings Filed -->
+            <section style="background: var(--cream); border: 2px solid var(--ink); padding: 24px;">
+                <h3 class="headline headline--section" style="font-size: var(--text-xl); border-bottom: 1px solid var(--ink); padding-bottom: 6px; margin-bottom: 16px;">
+                    Verified Pleadings &amp; Document Index
+                </h3>
+
+                <table style="width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: var(--text-xs);">
+                    <thead>
+                        <tr style="background: var(--newsprint-dark); border-bottom: 1.5px solid var(--ink); text-transform: uppercase; letter-spacing: 0.05em; text-align: left;">
+                            <th style="padding: 8px 12px;">Doc #</th>
+                            <th style="padding: 8px 12px;">Pleading Title</th>
+                            <th style="padding: 8px 12px;">Filed By</th>
+                            <th style="padding: 8px 12px;">Date Filed</th>
+                            <th style="padding: 8px 12px;">Pages</th>
+                            <th style="padding: 8px 12px; text-align: center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pleading in pleadings %}
+                            <tr style="border-bottom: 1px solid var(--hairline);">
+                                <td style="padding: 10px 12px; font-weight: 700;">{{ pleading.document_no|default:forloop.counter }}</td>
+                                <td style="padding: 10px 12px; font-weight: 600;">
+                                    {{ pleading.title }}
+                                    <div style="font-size: 11px; color: var(--muted); font-weight: normal;">
+                                        Type: {{ pleading.get_pleading_type_display }}
+                                    </div>
+                                </td>
+                                <td style="padding: 10px 12px;">{{ pleading.uploaded_by.display_name|default:"Registry" }}</td>
+                                <td style="padding: 10px 12px;">{{ pleading.uploaded_at|date:"d M Y" }}</td>
+                                <td style="padding: 10px 12px;">{{ pleading.page_count|default:"12" }}</td>
+                                <td style="padding: 10px 12px; text-align: center;">
+                                    <span style="border: 1px solid var(--hairline); padding: 1px 6px; font-size: 10px; text-transform: uppercase; background: var(--newsprint);">
+                                        Verified
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" style="padding: 18px; text-align: center; color: var(--muted); font-style: italic;">
+                                    No pleadings filed in registry index yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+        </div>
+
+
+        <!-- Right Column: Parties to the Cause & Advocates -->
+        <div>
+            <!-- Petitioners -->
+            <div style="background: var(--cream); border: 2px solid var(--ink); padding: 20px; margin-bottom: 24px;">
+                <span class="kicker">Parties of the First Part</span>
+                <h4 class="headline headline--card" style="margin-bottom: 12px;">
+                    Petitioners / Plaintiffs
+                </h4>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for p in petitioners %}
+                        <div style="border-bottom: 1px dashed var(--hairline); padding-bottom: 10px;">
+                            <div style="font-family: var(--font-headline); font-weight: 700; font-size: var(--text-sm); color: var(--ink);">
+                                {{ p.name }}
+                            </div>
+                            <div style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted);">
+                                {{ p.get_party_type_display }} &bull; {{ p.address|default:"New Delhi" }}
+                            </div>
+                            {% if p.advocate %}
+                                <div style="margin-top: 4px; font-family: var(--font-body); font-size: var(--text-xs); color: var(--oxblood);">
+                                    <strong>Counsel:</strong> {{ p.advocate.display_name }} ({{ p.advocate.bar_number|default:"Bar Council of Delhi" }})
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p style="font-style: italic; font-size: var(--text-xs); color: var(--muted);">
+                            No petitioner records attached.
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Respondents -->
+            <div style="background: var(--cream); border: 2px solid var(--ink); padding: 20px; margin-bottom: 24px;">
+                <span class="kicker">Parties of the Second Part</span>
+                <h4 class="headline headline--card" style="margin-bottom: 12px;">
+                    Respondents / Defendants
+                </h4>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    {% for r in respondents %}
+                        <div style="border-bottom: 1px dashed var(--hairline); padding-bottom: 10px;">
+                            <div style="font-family: var(--font-headline); font-weight: 700; font-size: var(--text-sm); color: var(--ink);">
+                                {{ r.name }}
+                            </div>
+                            <div style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted);">
+                                {{ r.get_party_type_display }} &bull; {{ r.address|default:"New Delhi" }}
+                            </div>
+                            {% if r.advocate %}
+                                <div style="margin-top: 4px; font-family: var(--font-body); font-size: var(--text-xs); color: var(--oxblood);">
+                                    <strong>Counsel:</strong> {{ r.advocate.display_name }} ({{ r.advocate.bar_number|default:"Bar Council of Delhi" }})
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p style="font-style: italic; font-size: var(--text-xs); color: var(--muted);">
+                            No respondent records attached.
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Registry Digital Seal Notice -->
+            <div style="border: 2px solid var(--ink); padding: 16px; background: var(--newsprint); text-align: center;">
+                <div style="font-family: var(--font-masthead); font-size: var(--text-2xl); color: var(--ink);">
+                    The Sunwai Registry
+                </div>
+                <div style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); margin-top: 6px; line-height: 1.5;">
+                    Certified Digital Court Docket. All pleadings verified with electronic timestamp under High Court Rules.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

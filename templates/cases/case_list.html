@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Master Case Register &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+    
+    <div style="border-bottom: 3px double var(--ink); padding-bottom: 12px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <span class="kicker">Official Gazette Record</span>
+            <h2 class="headline headline--lead" style="margin-bottom: 4px;">
+                Master Case Register
+            </h2>
+            <div class="deck" style="margin-bottom: 0;">
+                Comprehensive record of active civil suits, commercial disputes, and arbitrations listed for case management
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <form method="get" style="display: flex; gap: 12px; align-items: center; background: var(--cream); padding: 8px 12px; border: 1.5px solid var(--ink);">
+            <div>
+                <label for="status" style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-right: 4px;">Status:</label>
+                <select name="status" id="status" onchange="this.form.submit()" style="font-family: var(--font-body); font-size: var(--text-xs); padding: 4px 8px; border: 1px solid var(--ink); background: var(--newsprint);">
+                    <option value="">All Statuses</option>
+                    {% for code, label in status_choices %}
+                        <option value="{{ code }}" {% if current_status == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="type" style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-right: 4px;">Type:</label>
+                <select name="type" id="type" onchange="this.form.submit()" style="font-family: var(--font-body); font-size: var(--text-xs); padding: 4px 8px; border: 1px solid var(--ink); background: var(--newsprint);">
+                    <option value="">All Types</option>
+                    {% for code, label in type_choices %}
+                        <option value="{{ code }}" {% if current_type == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if current_status or current_type %}
+                <a href="{% url 'cases:case_list' %}" style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--oxblood); margin-left: 8px;">Reset</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Case Table -->
+    <div style="overflow-x: auto; border: 2px solid var(--ink); background: var(--cream);">
+        <table style="width: 100%; border-collapse: collapse; font-family: var(--font-body); font-size: var(--text-sm);">
+            <thead>
+                <tr style="background: var(--newsprint-dark); border-bottom: 2px solid var(--ink); font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; font-size: var(--text-xs); text-align: left;">
+                    <th style="padding: 12px 16px; border-right: var(--hairline-rule); width: 180px;">Case Number</th>
+                    <th style="padding: 12px 16px; border-right: var(--hairline-rule);">Suit Title &amp; Controversy</th>
+                    <th style="padding: 12px 16px; border-right: var(--hairline-rule); width: 140px;">Category</th>
+                    <th style="padding: 12px 16px; border-right: var(--hairline-rule); width: 160px;">Presiding Bench</th>
+                    <th style="padding: 12px 16px; border-right: var(--hairline-rule); width: 110px;">Stage</th>
+                    <th style="padding: 12px 16px; border-right: var(--hairline-rule); width: 110px;">Status</th>
+                    <th style="padding: 12px 16px; width: 160px; text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for case in cases %}
+                    <tr style="border-bottom: 1px solid var(--hairline); transition: background-color var(--transition-fast);">
+                        <td style="padding: 12px 16px; border-right: var(--hairline-rule); font-family: var(--font-headline); font-weight: 700;">
+                            <a href="{% url 'cases:case_detail' case.case_no %}" style="color: var(--ink);">
+                                {{ case.case_no }}
+                            </a>
+                            <div style="font-size: var(--text-xs); font-family: var(--font-body); color: var(--muted); font-weight: normal;">
+                                Filed: {{ case.filed_date|date:"d M Y" }}
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; border-right: var(--hairline-rule);">
+                            <div style="font-weight: 600; color: var(--ink); line-height: 1.4;">
+                                {{ case.title }}
+                            </div>
+                            <div style="font-size: var(--text-xs); color: var(--muted); margin-top: 2px;">
+                                Value: ₹{{ case.claim_value|default:"0" }} &bull; Next free window: Standard pre-trial
+                            </div>
+                        </td>
+                        <td style="padding: 12px 16px; border-right: var(--hairline-rule); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.05em;">
+                            {{ case.get_case_type_display }}
+                        </td>
+                        <td style="padding: 12px 16px; border-right: var(--hairline-rule); font-size: var(--text-xs);">
+                            {{ case.judge.display_name|default:"Unassigned" }}
+                        </td>
+                        <td style="padding: 12px 16px; border-right: var(--hairline-rule); font-size: var(--text-xs); text-transform: uppercase;">
+                            {{ case.stage }}
+                        </td>
+                        <td style="padding: 12px 16px; border-right: var(--hairline-rule);">
+                            <span style="display: inline-block; padding: 2px 8px; font-size: var(--text-xs); text-transform: uppercase; font-weight: 600; border: 1px solid var(--hairline); background: var(--newsprint);">
+                                {{ case.get_status_display }}
+                            </span>
+                        </td>
+                        <td style="padding: 12px 16px; text-align: center;">
+                            <a href="{% url 'cases:case_detail' case.case_no %}" class="btn btn--sm" style="margin-right: 4px;">
+                                Docket
+                            </a>
+                            <a href="{% url 'cases:case_bundle' case.case_no %}" class="btn btn--sm btn--oxblood">
+                                Bundle
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" style="padding: 36px; text-align: center; color: var(--muted); font-style: italic;">
+                            No cases matching current registry filters found.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

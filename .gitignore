@@ -1,0 +1,38 @@
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django database & media
+*.sqlite3
+db.sqlite3-journal
+media/
+
+# Environment variables
+.env
+.env.local
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# WeasyPrint / temp artifacts
+*.pdf
+scratch/

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Official Registry Sign In &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 650px; margin: 40px auto; padding: 32px; background: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 6px 0px rgba(26,26,26,0.15);">
+    <div style="text-align: center; border-bottom: 2px solid var(--ink); padding-bottom: 16px; margin-bottom: 24px;">
+        <span class="kicker">Restricted Registry Access</span>
+        <h2 class="headline headline--section" style="font-size: var(--text-3xl); margin-top: 4px;">
+            Official Portal Sign In
+        </h2>
+        <div class="deck" style="margin-bottom: 0;">
+            Authentication required for Judicial Officers, Registered Advocates, Litigants and Registry Staff
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'accounts:login' %}" style="display: flex; flex-direction: column; gap: 20px;">
+        {% csrf_token %}
+
+        <div>
+            <label for="email" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                Registered Email Address
+            </label>
+            <input type="email" id="email" name="email" required placeholder="counsel@bar.in or judge@thesunwai.court"
+                style="width: 100%; padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+        </div>
+
+        <div>
+            <label for="password" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                Security Credentials / Passphrase
+            </label>
+            <input type="password" id="password" name="password" required placeholder="••••••••••••"
+                style="width: 100%; padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: var(--text-sm); color: var(--muted); cursor: pointer;">
+                <input type="checkbox" name="remember" style="accent-color: var(--ink);">
+                Retain digital session token
+            </label>
+            <button type="submit" class="btn btn--filled" style="font-size: var(--text-base); padding: 10px 24px;">
+                Verify &amp; Enter Portal &rarr;
+            </button>
+        </div>
+    </form>
+
+    <div style="margin-top: 32px; padding-top: 16px; border-top: 1px dashed var(--hairline); font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted);">
+        <h5 style="font-family: var(--font-headline); text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink); margin-bottom: 8px;">
+            Registry Demo Credentials (Local Environment)
+        </h5>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; line-height: 1.5;">
+            <div>
+                <strong>Judge Bench:</strong><br>
+                <code>judge@thesunwai.court</code> &bull; <code>sunwai2024</code>
+            </div>
+            <div>
+                <strong>Advocate:</strong><br>
+                <code>advocate@thesunwai.court</code> &bull; <code>sunwai2024</code>
+            </div>
+            <div>
+                <strong>Registrar:</strong><br>
+                <code>registrar@thesunwai.court</code> &bull; <code>sunwai2024</code>
+            </div>
+            <div>
+                <strong>Administrator:</strong><br>
+                <code>admin@thesunwai.court</code> &bull; <code>sunwai2024</code>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

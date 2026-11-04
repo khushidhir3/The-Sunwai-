@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Schedule Hearing Slot &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 30px auto; padding: 32px; background: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 6px 0px rgba(26,26,26,0.12);">
+
+    <div style="border-bottom: 2px solid var(--ink); padding-bottom: 16px; margin-bottom: 24px;">
+        <span class="kicker">Registry Scheduling Desk</span>
+        <h2 class="headline headline--section" style="font-size: var(--text-3xl); margin-top: 4px;">
+            Schedule Case Management Hearing
+        </h2>
+        <div class="deck" style="margin-bottom: 0;">
+            Allocate courtroom, sitting date, and judicial roster window with automated double-booking conflict verification
+        </div>
+    </div>
+
+    <form method="post" action="{% url 'scheduling:schedule_hearing' %}" style="display: flex; flex-direction: column; gap: 20px;">
+        {% csrf_token %}
+
+        <!-- Case Number -->
+        <div>
+            <label for="case_no" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                Case Number
+            </label>
+            <input type="text" id="case_no" name="case_no" required placeholder="e.g. CS(COMM) 104/2024"
+                style="width: 100%; padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+            <span style="font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); margin-top: 4px; display: block;">
+                Must match an existing registered case in the Master Case Register.
+            </span>
+        </div>
+
+        <!-- Presiding Judge & HTMX Slot Suggestion -->
+        <div>
+            <label for="judge" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                Presiding Judicial Officer (Bench)
+            </label>
+            <select id="judge" name="judge" required
+                hx-get="{% url 'scheduling:suggest_slot' %}" hx-target="#slot-suggestion" hx-trigger="change"
+                style="width: 100%; padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+                <option value="">Select Presiding Judge...</option>
+                {% for j in judges %}
+                    <option value="{{ j.pk }}">{{ j.display_name }} ({{ j.email }})</option>
+                {% endfor %}
+            </select>
+            <div id="slot-suggestion"></div>
+        </div>
+
+        <!-- Courtroom -->
+        <div>
+            <label for="courtroom" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                Assigned Courtroom
+            </label>
+            <select id="courtroom" name="courtroom" required
+                style="width: 100%; padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+                <option value="">Select Courtroom...</option>
+                {% for c in courtrooms %}
+                    <option value="{{ c.pk }}">{{ c.name }} &bull; Capacity: {{ c.capacity }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Date & Time Row -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px;">
+            <div>
+                <label for="date" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                    Sitting Date
+                </label>
+                <input type="date" id="date" name="date" required
+                    style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint);">
+            </div>
+            <div>
+                <label for="start_time" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                    Start Time
+                </label>
+                <input type="time" id="start_time" name="start_time" required
+                    style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint);">
+            </div>
+            <div>
+                <label for="end_time" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                    End Time
+                </label>
+                <input type="time" id="end_time" name="end_time" required
+                    style="width: 100%; padding: 10px 12px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint);">
+            </div>
+        </div>
+
+        <!-- Purpose -->
+        <div>
+            <label for="purpose" style="display: block; font-family: var(--font-headline); font-size: var(--text-sm); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">
+                Hearing Nature &amp; Procedural Stage
+            </label>
+            <input type="text" id="purpose" name="purpose" value="Case Management Hearing &bull; Order X CPC" required
+                style="width: 100%; padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-base); border: 1.5px solid var(--ink); background: var(--newsprint); outline: none;">
+        </div>
+
+        <!-- Conflict Detection Notice -->
+        <div style="background: var(--newsprint-dark); border-left: 4px solid var(--ink); padding: 10px 14px; font-family: var(--font-body); font-size: var(--text-xs); color: var(--muted); line-height: 1.5;">
+            <strong>Automated Validation Active:</strong> Double bookings across Judge, Courtroom, and Appearing Advocates are verified before commit. Overlapping schedules will be rejected.
+        </div>
+
+        <!-- Submit & Actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <a href="{% url 'scheduling:cause_list' %}" class="btn">
+                &larr; Cancel
+            </a>
+            <button type="submit" class="btn btn--filled" style="padding: 12px 28px; font-size: var(--text-base);">
+                Commit Hearing to Cause Roll &rarr;
+            </button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

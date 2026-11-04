@@ -1,0 +1,20 @@
+<div id="checklist-item-{{ item.pk }}" style="border-bottom: 1px dashed var(--hairline); padding: 8px 0; display: flex; align-items: flex-start; gap: 10px;">
+    <button type="button"
+        hx-post="{% url 'hearings:toggle_checklist_item' item.pk %}"
+        hx-target="#checklist-item-{{ item.pk }}"
+        hx-swap="outerHTML"
+        style="cursor: pointer; background: transparent; border: none; padding: 0; font-size: 16px; line-height: 1; color: {% if item.is_completed %}var(--oxblood){% else %}var(--muted){% endif %};">
+        {% if item.is_completed %}&#9745;{% else %}&#9744;{% endif %}
+    </button>
+    <div style="flex: 1;">
+        <span style="font-family: var(--font-body); font-size: var(--text-xs); line-height: 1.4; {% if item.is_completed %}text-decoration: line-through; color: var(--muted);{% else %}color: var(--ink); font-weight: 600;{% endif %}">
+            {{ item.description }}
+        </span>
+        <div style="font-size: 10px; color: var(--muted); margin-top: 2px;">
+            Category: {{ item.get_category_display }}
+            {% if item.is_completed and item.completed_by %}
+                &bull; Verified by {{ item.completed_by.display_name }} ({{ item.completed_at|date:"H:i" }})
+            {% endif %}
+        </div>
+    </div>
+</div>
