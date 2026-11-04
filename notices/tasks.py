@@ -1,6 +1,11 @@
 """Celery tasks for sending hearing reminders."""
 from datetime import date, timedelta
-from celery import shared_task
+try:
+    from celery import shared_task
+except ImportError:
+    def shared_task(func):
+        func.delay = lambda *args, **kwargs: func(*args, **kwargs)
+        return func
 from django.core.mail import send_mail
 from django.conf import settings
 
