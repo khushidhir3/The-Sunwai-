@@ -36,3 +36,5 @@ celerybeat.pid
 # WeasyPrint / temp artifacts
 *.pdf
 scratch/
+.vercel
+.env*
