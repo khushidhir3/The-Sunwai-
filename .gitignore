@@ -11,6 +11,7 @@ __pycache__/
 
 # Django database & media
 *.sqlite3
+!seed_db.sqlite3
 db.sqlite3-journal
 media/
 
