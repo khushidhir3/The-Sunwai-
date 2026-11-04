@@ -1,31 +1,37 @@
-"""The Sunwai — Development Settings"""
+"""The Sunwai — Development & Serverless Settings"""
+import os
+from pathlib import Path
 from .base import *  # noqa: F401,F403
+from decouple import config
+import dj_database_url
 
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['*']
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database: use DATABASE_URL if available, else SQLite
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    db_file = Path('/tmp/db.sqlite3') if os.environ.get('VERCEL') else (BASE_DIR / 'db.sqlite3')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': db_file,
+        }
+    }
 
-# In-memory channel layer for dev
+# In-memory channel layer for dev / serverless
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
     },
 }
 
-# Console email for dev
+# Console email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Debug toolbar (if installed)
-try:
-    import debug_toolbar  # noqa: F401
-    INSTALLED_APPS += ['debug_toolbar']
-    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
-    INTERNAL_IPS = ['127.0.0.1']
-except ImportError:
-    pass
