@@ -8,6 +8,23 @@ import dj_database_url
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ['*']
 
+# CSRF trusted origins — required for Vercel deployments
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'https://the-sunwai-red.vercel.app',
+    'https://the-sunwai-khushi-dhirs-projects.vercel.app',
+    'http://localhost:8000',
+    'http://localhost:8008',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:8008',
+]
+
+# Cookie settings for serverless — don't require HTTPS for dev
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
 # Database: use DATABASE_URL if available, else SQLite
 if os.environ.get('DATABASE_URL'):
     DATABASES = {
@@ -35,3 +52,4 @@ CHANNEL_LAYERS = {
 
 # Console email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
