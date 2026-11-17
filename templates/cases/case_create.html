@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}File New Suit &bull; e-Filing Registry &bull; The Sunwai{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    
+    <!-- Header -->
+    <div style="border-bottom: 3px double var(--ink); padding-bottom: 16px; margin-bottom: 28px;">
+        <span class="kicker">Judicial Registry &bull; Form No. 1</span>
+        <h2 class="headline headline--lead" style="margin-bottom: 6px;">
+            e-Filing &amp; Case Enrollment
+        </h2>
+        <div class="deck">
+            Formal electronic submission of plaint, arbitration reference, or civil writ petition for registry enrollment.
+        </div>
+    </div>
+
+    <!-- Filing Form Card -->
+    <div style="background: var(--cream); border: 2px solid var(--ink); box-shadow: 6px 6px 0px var(--ink); padding: 32px 40px;">
+        <form method="post">
+            {% csrf_token %}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <!-- Case Number -->
+                <div>
+                    <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">
+                        Proposed Suit / Docket Number *
+                    </label>
+                    {{ form.case_no }}
+                    {% if form.case_no.errors %}
+                        <div style="color: var(--oxblood); font-size: var(--text-xs); margin-top: 4px;">{{ form.case_no.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Case Type -->
+                <div>
+                    <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">
+                        Jurisdiction / Category *
+                    </label>
+                    {{ form.case_type }}
+                </div>
+            </div>
+
+            <!-- Full Case Title -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">
+                    Formal Cause Title *
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div style="color: var(--oxblood); font-size: var(--text-xs); margin-top: 4px;">{{ form.title.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Parties Row -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; padding: 16px; background: var(--newsprint); border: 1px dashed var(--ink);">
+                <div>
+                    <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; color: var(--oxblood);">
+                        Plaintiff / Petitioner Name *
+                    </label>
+                    {{ form.petitioner_name }}
+                </div>
+                <div>
+                    <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; color: var(--oxblood);">
+                        Defendant / Respondent Name *
+                    </label>
+                    {{ form.respondent_name }}
+                </div>
+            </div>
+
+            <!-- Statement of Controversy / Description -->
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-bottom: 6px; letter-spacing: 0.05em;">
+                    Summary of Plaint &amp; Prayers for Relief
+                </label>
+                {{ form.description }}
+            </div>
+
+            <!-- Submit Button & Back -->
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1.5px solid var(--ink); padding-top: 20px;">
+                <a href="{% url 'cases:case_list' %}" class="btn btn--sm" style="background: transparent; border: 1px solid var(--ink);">
+                    &larr; Return to Case Register
+                </a>
+                <button type="submit" class="btn btn--oxblood" style="padding: 10px 24px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;">
+                    Enrol Suit in Registry &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    border: 1.5px solid var(--ink);
+    background: #ffffff;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+.form-input:focus {
+    border-color: var(--oxblood);
+    box-shadow: 0 0 0 2px rgba(139, 0, 0, 0.15);
+}
+</style>
+{% endblock %}

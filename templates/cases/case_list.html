@@ -17,8 +17,13 @@
             </div>
         </div>
 
-        <!-- Filter Form -->
-        <form method="get" style="display: flex; gap: 12px; align-items: center; background: var(--cream); padding: 8px 12px; border: 1.5px solid var(--ink);">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+            <a href="{% url 'cases:case_create' %}" class="btn btn--oxblood" style="padding: 8px 16px; font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;">
+                + Enrol New Suit / e-Filing
+            </a>
+
+            <!-- Filter Form -->
+            <form method="get" style="display: flex; gap: 12px; align-items: center; background: var(--cream); padding: 8px 12px; border: 1.5px solid var(--ink);">
             <div>
                 <label for="status" style="font-family: var(--font-headline); font-size: var(--text-xs); text-transform: uppercase; font-weight: 700; margin-right: 4px;">Status:</label>
                 <select name="status" id="status" onchange="this.form.submit()" style="font-family: var(--font-body); font-size: var(--text-xs); padding: 4px 8px; border: 1px solid var(--ink); background: var(--newsprint);">

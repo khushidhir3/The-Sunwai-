@@ -1,8 +1,44 @@
 """Cases views — case list, detail, case bundle."""
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import Case, Pleading
+from .forms import CaseFilingForm
+from .models import Case, Party, Pleading
+
+
+@login_required
+def case_create(request):
+    """File a new suit / e-filing."""
+    if request.method == 'POST':
+        form = CaseFilingForm(request.POST)
+        if form.is_valid():
+            case = form.save(commit=False)
+            case.status = Case.Status.FILED
+            case.stage = Case.Stage.FILING
+            case.save()
+
+            # Create Petitioner
+            Party.objects.create(
+                case=case,
+                name=form.cleaned_data['petitioner_name'],
+                party_type=Party.PartyType.PETITIONER,
+                advocate=request.user if request.user.role == 'advocate' else None,
+            )
+
+            # Create Respondent
+            Party.objects.create(
+                case=case,
+                name=form.cleaned_data['respondent_name'],
+                party_type=Party.PartyType.RESPONDENT,
+            )
+
+            messages.success(request, f"Case {case.case_no} successfully enrolled in the registry!")
+            return redirect('cases:case_detail', case_no=case.case_no)
+    else:
+        form = CaseFilingForm()
+
+    return render(request, 'cases/case_create.html', {'form': form})
 
 
 @login_required
